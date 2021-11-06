@@ -1,25 +1,22 @@
 import pygame
-from classes import (
-    NotGate,
-    Options,
+from colors import *
+from nclasses import (
+    Basic,
     Button,
-    Wire,
-    Switch
+    NotGate,
+    Switch,
+    Wire
 )
-
-# colors
-BG_COLOR = (113, 137, 179)
-OPTIONS_COLOR = (179, 155, 113)
-
-WIDTH, HEIGHT = 900, 500
-WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Logic Gates and what not")
-OPTIONS = Options(WIDTH, int(HEIGHT * 0.1), 0, HEIGHT - int(HEIGHT * 0.1), OPTIONS_COLOR)
 
 FPS = 60
 pygame.font.init()
 fps_font = pygame.font.SysFont('Arial', 15)
 font = pygame.font.SysFont('adobegothicstdkalin', 20)
+
+WIDTH, HEIGHT = 900, 500
+WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Logic Gates and what not")
+OPTIONS = Basic((0, HEIGHT - int(HEIGHT * 0.1)), (WIDTH, int(HEIGHT * 0.1)), OPTIONS_COLOR, "", font)
 
 selected = None
 first_gate = None
@@ -32,27 +29,27 @@ BUTTON_SIZE = (int(WIDTH * 0.0277 * 2), int(WIDTH * 0.0277))
 NOT_GATE_SIZE = (int(WIDTH * 0.0277 * 2), int(WIDTH * 0.0277))
 NOT_GATE_BUTTON = Button((int(WIDTH * 0.0277), int((HEIGHT * 0.1) / 2) - int(WIDTH * 0.01385)),
                          BUTTON_SIZE,
-                         1,
-                         OPTIONS,
-                         font,
+                         BLUE,
                          "Not",
-                         (25, 200, 255))
+                         font,
+                         assigned=1,
+                         panel=OPTIONS)
 
-SWITCH_BUTTON_RADIUS = (int((HEIGHT * 0.1) / 3))
+SWITCH_SIZE = (int(WIDTH * 0.0277 * 2), int(WIDTH * 0.0277))
 SWITCH_BUTTON = Button((int(WIDTH * 0.1108), int((HEIGHT * 0.1) / 2) - int(WIDTH * 0.01385)),
                        BUTTON_SIZE,
-                       2,
-                       OPTIONS,
-                       font,
+                       YELLOW,
                        "Switch",
-                       (255, 255, 255))
+                       font,
+                       assigned=2,
+                       panel=OPTIONS)
 not_gates = []
 wires = []
 switches = []
 buttons = [NOT_GATE_BUTTON, SWITCH_BUTTON]
 object_list = {
-    1: [NotGate, not_gates, NOT_GATE_SIZE],
-    2: [Switch, switches, SWITCH_BUTTON_RADIUS]
+    1: [NotGate, not_gates, NOT_GATE_SIZE, "Not", BLUE],
+    2: [Switch, switches, SWITCH_SIZE, "Switch", YELLOW]
 }
 
 
@@ -98,7 +95,9 @@ def click(pos):
         for gate in not_gates:
             if gate.click((x, y)):
                 if first_gate:
-                    wire = Wire((first_gate.pos[0] + first_gate.size[0], first_gate.pos[1]), gate.pos,
+                    wire = Wire((first_gate.pos[0] + first_gate.size[0],
+                                 first_gate.pos[1]),
+                                gate.pos,
                                 first_gate.transform())
                     wires.append(wire)
                     gate.switch(first_gate.transform())
@@ -106,8 +105,13 @@ def click(pos):
                 else:
                     first_gate = gate
 
-    if selected and OPTIONS.not_collided((x, y)):
-        temp = object_list[selected][0]((x - 15, y - 15), object_list[selected][2], True, font)
+    if selected and not OPTIONS.click((x, y)):
+        temp = object_list[selected][0]((x - 15, y - 15),
+                                        object_list[selected][2],
+                                        object_list[selected][4],
+                                        object_list[selected][3],
+                                        font,
+                                        value=True)
         object_list[selected][1].append(temp)
         selected = None
 
