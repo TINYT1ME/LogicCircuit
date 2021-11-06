@@ -1,6 +1,6 @@
 import pygame
 from colors import *
-from nclasses import (
+from classes import (
     Basic,
     Button,
     NotGate,
