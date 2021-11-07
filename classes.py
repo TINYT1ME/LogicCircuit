@@ -1,4 +1,5 @@
 import pygame
+from colors import *
 
 
 class Basic:
@@ -34,16 +35,33 @@ class NotGate(Basic):
         self.inp = inp
 
 
-class Switch(Basic):
-    def __init__(self, *args, value: bool):
-        super(Switch, self).__init__(*args)
+class Switch:
+    def __init__(self, pos: tuple, size: tuple, panel, value: bool):
+        self.panel = panel
+        self.pos = (panel.pos[0] + int(pos[0]), int(panel.pos[1] + pos[1]))
+        self.size = size
+        self.surf = pygame.Surface(self.size)
+        self.text = pygame.font.SysFont('adobegothicstdkalin', 20).render("Switch", False, (0, 0, 0))
         self.value = value
+
+    def draw(self, window):
+        if self.value:
+            self.surf.fill(YELLOW)
+        else:
+            self.surf.fill(WHITE)
+        window.blit(self.surf, self.pos)
+        window.blit(self.text, self.pos)
+
+    def click(self, mouse_pos):
+        return (
+                self.pos[0] < mouse_pos[0] < self.pos[0] + self.size[0]
+                and self.pos[1] < mouse_pos[1] < self.pos[1] + self.size[1]
+        )
 
 
 class Button(Basic):
-    def __init__(self, *args, assigned: int, panel):
+    def __init__(self, *args, panel):
         super(Button, self).__init__(*args)
-        self.assigned = assigned
         self.pos = (panel.pos[0] + int(self.pos[0]), int(panel.pos[1] + self.pos[1]))
 
 
