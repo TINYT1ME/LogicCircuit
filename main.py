@@ -1,18 +1,12 @@
 import pygame
 from colors import *
-from classes import (
-    Basic,
-    Button,
-    NotGate,
-    Switch,
-    Wire
-)
+from classes import Basic, Button, NotGate, Switch, Wire
 
 pygame.display.set_caption("Logic Gates and what not")
 FPS = 60
 pygame.font.init()
-fps_font = pygame.font.SysFont('Arial', 15)
-font = pygame.font.SysFont('adobegothicstdkalin', 20)
+fps_font = pygame.font.SysFont("Arial", 15)
+font = pygame.font.SysFont("adobegothicstdkalin", 20)
 
 WIDTH, HEIGHT = 900, 500
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -20,8 +14,16 @@ BASIC_SIZE = (int(WIDTH * 0.0277 * 2), int(WIDTH * 0.0277))
 SWITCH_SIZE = (int(WIDTH * 0.0277 * 2), int(WIDTH * 0.0277))
 
 # Defining panels
-BUTTON_PANEL = Basic((0, HEIGHT - int(HEIGHT * 0.1)), (WIDTH, int(HEIGHT * 0.1)), PANEL_COLOR, "", font)
-SWITCH_PANEL = Basic((0, HEIGHT / 6), (int(WIDTH * 0.0277 * 2), int(HEIGHT * 0.06) * 12), PANEL_COLOR, "", font)
+BUTTON_PANEL = Basic(
+    (0, HEIGHT - int(HEIGHT * 0.1)), (WIDTH, int(HEIGHT * 0.1)), PANEL_COLOR, "", font
+)
+SWITCH_PANEL = Basic(
+    (0, HEIGHT / 6),
+    (int(WIDTH * 0.0277 * 2), int(HEIGHT * 0.06) * 12),
+    PANEL_COLOR,
+    "",
+    font,
+)
 
 selected = None
 first_gate = None
@@ -29,35 +31,48 @@ first_gate = None
 circle = pygame.Surface((20, 20), pygame.SRCALPHA)
 pygame.draw.circle(circle, (123, 123, 123, 255), (10, 10), 10)
 
-SWITCH_ADD_BUTTON = Button((0, -(int((HEIGHT * 0.15) / 2) - int(WIDTH * 0.01385) + BASIC_SIZE[1] + 2)),
-                           BASIC_SIZE,
-                           GREEN,
-                           "+Switch",
-                           font,
-                           panel=SWITCH_PANEL)
+SWITCH_ADD_BUTTON = Button(
+    (0, -(int((HEIGHT * 0.15) / 2) - int(WIDTH * 0.01385) + BASIC_SIZE[1] + 2)),
+    BASIC_SIZE,
+    GREEN,
+    "+Switch",
+    font,
+    panel=SWITCH_PANEL,
+)
 
-SWITCH_REMOVE_BUTTON = Button((0, -(int((HEIGHT * 0.15) / 2) - int(WIDTH * 0.01385))),
-                              BASIC_SIZE,
-                              RED,
-                              "-Switch",
-                              font,
-                              panel=SWITCH_PANEL)
+SWITCH_REMOVE_BUTTON = Button(
+    (0, -(int((HEIGHT * 0.15) / 2) - int(WIDTH * 0.01385))),
+    BASIC_SIZE,
+    RED,
+    "-Switch",
+    font,
+    panel=SWITCH_PANEL,
+)
 
-NOT_GATE_BUTTON = Button((int(WIDTH * 0.1108), int((HEIGHT * 0.1) / 2) - int(WIDTH * 0.01385)),
-                         BASIC_SIZE,
-                         BLUE,
-                         "Not",
-                         font,
-                         panel=BUTTON_PANEL)
+NOT_GATE_BUTTON = Button(
+    (int(WIDTH * 0.1108), int((HEIGHT * 0.1) / 2) - int(WIDTH * 0.01385)),
+    BASIC_SIZE,
+    BLUE,
+    "Not",
+    font,
+    panel=BUTTON_PANEL,
+)
 
 not_gates = []
 wires = []
 switches = []
 buttons = [NOT_GATE_BUTTON]
-# 2: [Switch, switches, SWITCH_SIZE, "Switch", YELLOW]
+
 object_list = {
     1: [NotGate, not_gates, BASIC_SIZE, "Not", BLUE],
+    2: [Switch, switches, SWITCH_SIZE, "Switch", WHITE],
 }
+
+
+# Updates logic
+def update():
+    for wire in wires:
+        wire.update()
 
 
 def switch_handler(pos, event):
@@ -65,11 +80,19 @@ def switch_handler(pos, event):
     if event.button == 1:
         # Creating/removing switches
         if SWITCH_ADD_BUTTON.click(pos) and len(switches) < 12:
-            switches.append(Switch((0, int(HEIGHT * 0.06) * len(switches)),
-                                   SWITCH_SIZE,
-                                   SWITCH_PANEL,
-                                   False))
+            switches.append(
+                Switch(
+                    (0, int(HEIGHT * 0.06) * len(switches)), SWITCH_SIZE, SWITCH_PANEL
+                )
+            )
         elif SWITCH_REMOVE_BUTTON.click(pos):
+            # Removes wire connected to switch
+            try:
+                wires.remove(switches[len(switches) - 1].out)
+            except ValueError:
+                pass
+
+            # Remove switch
             try:
                 switches.pop()
             except IndexError:
@@ -88,18 +111,26 @@ def wire_handler(pos, event):
 
     # LEFT CLICK
     if event.button == 1 and selected is None:
-        for gate in not_gates:
-            if gate.click(pos):
-                if first_gate:
-                    wire = Wire((first_gate.pos[0] + first_gate.size[0],
-                                 first_gate.pos[1]),
-                                gate.pos,
-                                first_gate.transform())
-                    wires.append(wire)
-                    gate.switch(first_gate.transform())
-                    first_gate = None
-                else:
-                    first_gate = gate
+        for obj in object_list:
+            for out in object_list[obj][1]:
+                if out.click(pos):
+                    if first_gate:
+                        if out.inp1 is None:
+                            wire = Wire(
+                                (
+                                    first_gate.pos[0] + first_gate.size[0],
+                                    first_gate.pos[1],
+                                ),
+                                out.pos,
+                                first_gate,
+                                out,
+                            )
+                            wires.append(wire)
+                            wire.inp.out = wire
+                            wire.out.inp1 = wire
+                            first_gate = None
+                    else:
+                        first_gate = out
 
 
 def gates_handler(pos, event):
@@ -109,12 +140,13 @@ def gates_handler(pos, event):
     if event.button == 1:
         # Creating gates
         if selected and not BUTTON_PANEL.click(pos):
-            temp = object_list[selected][0]((pos[0] - 15, pos[1] - 15),
-                                            object_list[selected][2],
-                                            object_list[selected][4],
-                                            object_list[selected][3],
-                                            font,
-                                            value=False)
+            temp = object_list[selected][0](
+                (pos[0] - 15, pos[1] - 15),
+                object_list[selected][2],
+                object_list[selected][4],
+                object_list[selected][3],
+                font,
+            )
             object_list[selected][1].append(temp)
             selected = None
         for button in buttons:
@@ -169,6 +201,7 @@ def main():
     run = True
     while run:
         clock.tick(FPS)
+        update()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -181,5 +214,5 @@ def main():
     pygame.quit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
