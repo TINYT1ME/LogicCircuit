@@ -4,13 +4,13 @@ from colors import *
 
 class Basic:
     def __init__(
-        self,
-        pos: tuple,
-        size: tuple,
-        color: tuple,
-        text: str,
-        font: pygame.font.SysFont,
-        *args
+            self,
+            pos: tuple,
+            size: tuple,
+            color: tuple,
+            text: str,
+            font: pygame.font.SysFont,
+            *args
     ):
         self.pos = pos
         self.size = size
@@ -26,8 +26,8 @@ class Basic:
 
     def click(self, mouse_pos):
         return (
-            self.pos[0] < mouse_pos[0] < self.pos[0] + self.size[0]
-            and self.pos[1] < mouse_pos[1] < self.pos[1] + self.size[1]
+                self.pos[0] < mouse_pos[0] < self.pos[0] + self.size[0]
+                and self.pos[1] < mouse_pos[1] < self.pos[1] + self.size[1]
         )
 
 
@@ -46,6 +46,12 @@ class NotGate(Basic):
             self.value = not self.inp1.value
         except AttributeError:
             self.value = False
+
+
+class Button(Basic):
+    def __init__(self, *args, panel):
+        super(Button, self).__init__(*args)
+        self.pos = (panel.pos[0] + int(self.pos[0]), int(panel.pos[1] + self.pos[1]))
 
 
 class Switch:
@@ -70,18 +76,42 @@ class Switch:
 
     def click(self, mouse_pos):
         return (
-            self.pos[0] < mouse_pos[0] < self.pos[0] + self.size[0]
-            and self.pos[1] < mouse_pos[1] < self.pos[1] + self.size[1]
+                self.pos[0] < mouse_pos[0] < self.pos[0] + self.size[0]
+                and self.pos[1] < mouse_pos[1] < self.pos[1] + self.size[1]
         )
 
     def update(self):
         pass
 
 
-class Button(Basic):
-    def __init__(self, *args, panel):
-        super(Button, self).__init__(*args)
-        self.pos = (panel.pos[0] + int(self.pos[0]), int(panel.pos[1] + self.pos[1]))
+class Led:
+    def __init__(self, pos: tuple, size: tuple, panel):
+        self.panel = panel
+        self.pos = (panel.pos[0] + int(pos[0]), int(panel.pos[1] + pos[1]))
+        self.size = size
+        self.surf = pygame.Surface(self.size)
+        self.text = pygame.font.SysFont("adobegothicstdkalin", 20).render(
+            "LED", False, (0, 0, 0)
+        )
+        self.value = False
+        self.inp1 = None
+
+    def draw(self, window):
+        if self.value:
+            self.surf.fill(RED)
+        else:
+            self.surf.fill(WHITE)
+        window.blit(self.surf, self.pos)
+        window.blit(self.text, self.pos)
+
+    def click(self, mouse_pos):
+        return (
+                self.pos[0] < mouse_pos[0] < self.pos[0] + self.size[0]
+                and self.pos[1] < mouse_pos[1] < self.pos[1] + self.size[1]
+        )
+
+    def update(self):
+        self.value = self.inp1.value
 
 
 class Wire:

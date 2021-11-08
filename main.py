@@ -1,6 +1,6 @@
 import pygame
 from colors import *
-from classes import Basic, Button, NotGate, Switch, Wire
+from classes import Basic, Button, NotGate, Switch, Wire, Led
 
 pygame.display.set_caption("Logic Gates and what not")
 FPS = 60
@@ -12,6 +12,7 @@ WIDTH, HEIGHT = 900, 500
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 BASIC_SIZE = (int(WIDTH * 0.0277 * 2), int(WIDTH * 0.0277))
 SWITCH_SIZE = (int(WIDTH * 0.0277 * 2), int(WIDTH * 0.0277))
+LED_SIZE = (int(WIDTH * 0.0277 * 2), int(WIDTH * 0.0277))
 
 # Defining panels
 BUTTON_PANEL = Basic(
@@ -19,6 +20,14 @@ BUTTON_PANEL = Basic(
 )
 SWITCH_PANEL = Basic(
     (0, HEIGHT / 6),
+    (int(WIDTH * 0.0277 * 2), int(HEIGHT * 0.06) * 12),
+    PANEL_COLOR,
+    "",
+    font,
+)
+
+LED_PANEL = Basic(
+    (WIDTH - int(WIDTH * 0.0277 * 2), HEIGHT / 6),
     (int(WIDTH * 0.0277 * 2), int(HEIGHT * 0.06) * 12),
     PANEL_COLOR,
     "",
@@ -49,6 +58,24 @@ SWITCH_REMOVE_BUTTON = Button(
     panel=SWITCH_PANEL,
 )
 
+LED_ADD_BUTTON = Button(
+    (0, -(int((HEIGHT * 0.15) / 2) - int(WIDTH * 0.01385) + BASIC_SIZE[1] + 2)),
+    BASIC_SIZE,
+    GREEN,
+    "+LED",
+    font,
+    panel=LED_PANEL,
+)
+
+LED_REMOVE_BUTTON = Button(
+    (0, -(int((HEIGHT * 0.15) / 2) - int(WIDTH * 0.01385))),
+    BASIC_SIZE,
+    RED,
+    "-LED",
+    font,
+    panel=LED_PANEL,
+)
+
 NOT_GATE_BUTTON = Button(
     (int(WIDTH * 0.1108), int((HEIGHT * 0.1) / 2) - int(WIDTH * 0.01385)),
     BASIC_SIZE,
@@ -59,13 +86,15 @@ NOT_GATE_BUTTON = Button(
 )
 
 not_gates = []
+leds = []
 wires = []
 switches = []
 buttons = [NOT_GATE_BUTTON]
 
 object_list = {
     1: [NotGate, not_gates, BASIC_SIZE, "Not", BLUE],
-    2: [Switch, switches, SWITCH_SIZE, "Switch", WHITE],
+    2: [Switch, switches, SWITCH_SIZE, "Switch", None],
+    3: [Led, leds, LED_SIZE, "LED", None]
 }
 
 
@@ -73,6 +102,29 @@ object_list = {
 def update():
     for wire in wires:
         wire.update()
+
+
+def led_handler(pos, event):
+    # LEFT CLICK
+    if event.button == 1:
+        if LED_ADD_BUTTON.click(pos) and len(leds) < 12:
+            leds.append(
+                Led(
+                    (0, int(HEIGHT * 0.06) * len(leds)), LED_SIZE, LED_PANEL
+                )
+            )
+        elif LED_REMOVE_BUTTON.click(pos):
+            # Removes wire connected to led
+            try:
+                wires.remove(leds[len(leds) - 1].inp1)
+            except (ValueError, IndexError):
+                pass
+
+            # Remove led
+            try:
+                leds.pop()
+            except IndexError:
+                pass
 
 
 def switch_handler(pos, event):
@@ -89,7 +141,7 @@ def switch_handler(pos, event):
             # Removes wire connected to switch
             try:
                 wires.remove(switches[len(switches) - 1].out)
-            except ValueError:
+            except (ValueError, IndexError):
                 pass
 
             # Remove switch
@@ -158,10 +210,11 @@ def gates_handler(pos, event):
 def draw_window(fps: int):
     x, y = pygame.mouse.get_pos()
 
-    # draw bg and options
+    # draw bg and panels
     WIN.fill(BG_COLOR)
     BUTTON_PANEL.draw(WIN)
     SWITCH_PANEL.draw(WIN)
+    LED_PANEL.draw(WIN)
 
     # draw not gates
     for gate in not_gates:
@@ -173,10 +226,15 @@ def draw_window(fps: int):
     for switch in switches:
         switch.draw(WIN)
 
+    for led in leds:
+        led.draw(WIN)
+
     # draw option buttons
     NOT_GATE_BUTTON.draw(WIN)
     SWITCH_ADD_BUTTON.draw(WIN)
     SWITCH_REMOVE_BUTTON.draw(WIN)
+    LED_ADD_BUTTON.draw(WIN)
+    LED_REMOVE_BUTTON.draw(WIN)
 
     # fps counter
     fps_counter = fps_font.render(str(fps), False, (0, 204, 34))
@@ -191,12 +249,15 @@ def draw_window(fps: int):
 
 
 def click(pos, event):
+    led_handler(pos, event)
     switch_handler(pos, event)
     wire_handler(pos, event)
     gates_handler(pos, event)
 
 
 def main():
+    global selected
+    global first_gate
     clock = pygame.time.Clock()
     run = True
     while run:
@@ -208,6 +269,10 @@ def main():
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 click(pygame.mouse.get_pos(), event)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                selected = None
+                first_gate = None
 
         draw_window(int(clock.get_fps()))
 
