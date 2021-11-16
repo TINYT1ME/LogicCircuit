@@ -94,7 +94,7 @@ buttons = [NOT_GATE_BUTTON]
 object_list = {
     1: [NotGate, not_gates, BASIC_SIZE, "Not", BLUE],
     2: [Switch, switches, SWITCH_SIZE, "Switch", None],
-    3: [Led, leds, LED_SIZE, "LED", None],
+    3: [Led, leds, LED_SIZE, "LED", None]
 }
 
 
@@ -108,7 +108,11 @@ def led_handler(pos, event):
     # LEFT CLICK
     if event.button == 1:
         if LED_ADD_BUTTON.click(pos) and len(leds) < 12:
-            leds.append(Led((0, int(HEIGHT * 0.06) * len(leds)), LED_SIZE, LED_PANEL))
+            leds.append(
+                Led(
+                    (0, int(HEIGHT * 0.06) * len(leds)), LED_SIZE, LED_PANEL
+                )
+            )
         elif LED_REMOVE_BUTTON.click(pos):
             # Removes wire connected to led
             try:

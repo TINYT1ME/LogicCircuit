@@ -4,13 +4,13 @@ from colors import *
 
 class Basic:
     def __init__(
-        self,
-        pos: tuple,
-        size: tuple,
-        color: tuple,
-        text: str,
-        font: pygame.font.SysFont,
-        *args
+            self,
+            pos: tuple,
+            size: tuple,
+            color: tuple,
+            text: str,
+            font: pygame.font.SysFont,
+            *args
     ):
         self.pos = pos
         self.size = size
@@ -26,8 +26,8 @@ class Basic:
 
     def click(self, mouse_pos):
         return (
-            self.pos[0] < mouse_pos[0] < self.pos[0] + self.size[0]
-            and self.pos[1] < mouse_pos[1] < self.pos[1] + self.size[1]
+                self.pos[0] < mouse_pos[0] < self.pos[0] + self.size[0]
+                and self.pos[1] < mouse_pos[1] < self.pos[1] + self.size[1]
         )
 
 
@@ -76,8 +76,8 @@ class Switch:
 
     def click(self, mouse_pos):
         return (
-            self.pos[0] < mouse_pos[0] < self.pos[0] + self.size[0]
-            and self.pos[1] < mouse_pos[1] < self.pos[1] + self.size[1]
+                self.pos[0] < mouse_pos[0] < self.pos[0] + self.size[0]
+                and self.pos[1] < mouse_pos[1] < self.pos[1] + self.size[1]
         )
 
     def update(self):
@@ -106,8 +106,8 @@ class Led:
 
     def click(self, mouse_pos):
         return (
-            self.pos[0] < mouse_pos[0] < self.pos[0] + self.size[0]
-            and self.pos[1] < mouse_pos[1] < self.pos[1] + self.size[1]
+                self.pos[0] < mouse_pos[0] < self.pos[0] + self.size[0]
+                and self.pos[1] < mouse_pos[1] < self.pos[1] + self.size[1]
         )
 
     def update(self):
