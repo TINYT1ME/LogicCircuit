@@ -34,19 +34,31 @@ class Basic:
 class NotGate(Basic):
     def __init__(self, *args):
         super(NotGate, self).__init__(*args)
-        self.inp1 = None
+        self.inp = [[""]]
         self.out = None
         self.value = False
 
-    def transform(self):
-        return not self.inp
-
     def update(self):
         try:
-            self.value = not self.inp1.value
+            self.value = not self.inp[0][0].value
         except AttributeError:
             self.value = False
 
+class AndGate(Basic):
+    def __init__(self, *args):
+        super(AndGate, self).__init__(*args)
+        self.inp = [[""], [""]]
+        self.out = None
+        self.value = False
+
+    def update(self):
+        try:
+            if self.inp[0][0].value is True and self.inp[1][0].value is True:
+                self.value = True
+            else:
+                self.value = False
+        except AttributeError:
+            self.value = False
 
 class Button(Basic):
     def __init__(self, *args, panel):
@@ -94,7 +106,7 @@ class Led:
             "LED", False, (0, 0, 0)
         )
         self.value = False
-        self.inp1 = None
+        self.inp = [[""]]
 
     def draw(self, window):
         if self.value:
@@ -111,7 +123,7 @@ class Led:
         )
 
     def update(self):
-        self.value = self.inp1.value
+        self.value = self.inp[0][0].value
 
 
 class Wire:

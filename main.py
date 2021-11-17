@@ -1,6 +1,6 @@
 import pygame
 from colors import *
-from classes import Basic, Button, NotGate, Switch, Wire, Led
+from classes import Basic, Button, NotGate, Switch, Wire, Led, AndGate
 
 pygame.display.set_caption("Logic Gates and what not")
 FPS = 60
@@ -84,17 +84,26 @@ NOT_GATE_BUTTON = Button(
     font,
     panel=BUTTON_PANEL,
 )
-
+AND_GATE_BUTTON = Button(
+    (int(WIDTH * 0.1108 * 2), int((HEIGHT * 0.1) / 2) - int(WIDTH * 0.01385)),
+    BASIC_SIZE,
+    BLUE,
+    "And",
+    font,
+    panel=BUTTON_PANEL,
+)
 not_gates = []
+and_gates = []
 leds = []
 wires = []
 switches = []
-buttons = [NOT_GATE_BUTTON]
+buttons = [NOT_GATE_BUTTON, AND_GATE_BUTTON]
 
 object_list = {
-    1: [NotGate, not_gates, BASIC_SIZE, "Not", BLUE],
-    2: [Switch, switches, SWITCH_SIZE, "Switch", None],
-    3: [Led, leds, LED_SIZE, "LED", None]
+    1: [NotGate, not_gates, BASIC_SIZE, "Not", BLUE, NOT_GATE_BUTTON],
+    2: [Switch, switches, SWITCH_SIZE, "Switch", None, None],
+    3: [Led, leds, LED_SIZE, "LED", None, None],
+    4: [AndGate, and_gates, BASIC_SIZE, "And", BLUE, AND_GATE_BUTTON],
 }
 
 
@@ -167,20 +176,23 @@ def wire_handler(pos, event):
             for out in object_list[obj][1]:
                 if out.click(pos):
                     if first_gate:
-                        if out.inp1 is None:
-                            wire = Wire(
-                                (
-                                    first_gate.pos[0] + first_gate.size[0],
-                                    first_gate.pos[1],
-                                ),
-                                out.pos,
-                                first_gate,
-                                out,
-                            )
-                            wires.append(wire)
-                            wire.inp.out = wire
-                            wire.out.inp1 = wire
-                            first_gate = None
+                        for inputs in out.inp:
+                            if inputs[0] == "":
+                                wire = Wire(
+                                    (
+                                        first_gate.pos[0] + first_gate.size[0],
+                                        first_gate.pos[1],
+                                    ),
+                                    out.pos,
+                                    first_gate,
+                                    out,
+                                )
+                                wires.append(wire)
+                                wire.inp.out = wire
+                                inputs[0] = wire
+                                first_gate = None
+                                # breaking due to gates with multiple inputs
+                                break
                     else:
                         first_gate = out
 
@@ -192,19 +204,20 @@ def gates_handler(pos, event):
     if event.button == 1:
         # Creating gates
         if selected and not BUTTON_PANEL.click(pos):
-            temp = object_list[selected][0](
+            temp = selected[0](
                 (pos[0] - 15, pos[1] - 15),
-                object_list[selected][2],
-                object_list[selected][4],
-                object_list[selected][3],
+                selected[2],
+                selected[4],
+                selected[3],
                 font,
             )
-            object_list[selected][1].append(temp)
+            selected[1].append(temp)
             selected = None
-        for button in buttons:
-            if button.click(pos):
-                selected = buttons.index(button) + 1
-                break
+        for obj in object_list:
+            if object_list[obj][5] is not None:
+                if object_list[obj][5].click(pos):
+                    selected = object_list[obj]
+                    break
 
 
 def draw_window(fps: int):
@@ -220,6 +233,9 @@ def draw_window(fps: int):
     for gate in not_gates:
         gate.draw(WIN)
 
+    for gate in and_gates:
+        gate.draw(WIN)
+
     for wire in wires:
         wire.draw(WIN)
 
@@ -230,7 +246,8 @@ def draw_window(fps: int):
         led.draw(WIN)
 
     # draw option buttons
-    NOT_GATE_BUTTON.draw(WIN)
+    for button in buttons:
+        button.draw(WIN)
     SWITCH_ADD_BUTTON.draw(WIN)
     SWITCH_REMOVE_BUTTON.draw(WIN)
     LED_ADD_BUTTON.draw(WIN)
