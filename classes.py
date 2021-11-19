@@ -4,13 +4,13 @@ from colors import *
 
 class Basic:
     def __init__(
-            self,
-            pos: tuple,
-            size: tuple,
-            color: tuple,
-            text: str,
-            font: pygame.font.SysFont,
-            *args
+        self,
+        pos: tuple,
+        size: tuple,
+        color: tuple,
+        text: str,
+        font: pygame.font.SysFont,
+        *args
     ):
         self.pos = pos
         self.size = size
@@ -26,8 +26,8 @@ class Basic:
 
     def click(self, mouse_pos):
         return (
-                self.pos[0] < mouse_pos[0] < self.pos[0] + self.size[0]
-                and self.pos[1] < mouse_pos[1] < self.pos[1] + self.size[1]
+            self.pos[0] < mouse_pos[0] < self.pos[0] + self.size[0]
+            and self.pos[1] < mouse_pos[1] < self.pos[1] + self.size[1]
         )
 
 
@@ -44,6 +44,7 @@ class NotGate(Basic):
         except AttributeError:
             self.value = False
 
+
 class AndGate(Basic):
     def __init__(self, *args):
         super(AndGate, self).__init__(*args)
@@ -59,6 +60,92 @@ class AndGate(Basic):
                 self.value = False
         except AttributeError:
             self.value = False
+
+
+class NandGate(Basic):
+    def __init__(self, *args):
+        super(NandGate, self).__init__(*args)
+        self.inp = [[""], [""]]
+        self.out = None
+        self.value = False
+
+    def update(self):
+        try:
+            if self.inp[0][0].value is True and self.inp[1][0].value is True:
+                self.value = False
+            else:
+                self.value = True
+        except AttributeError:
+            self.value = False
+
+
+class OrGate(Basic):
+    def __init__(self, *args):
+        super(OrGate, self).__init__(*args)
+        self.inp = [[""], [""]]
+        self.out = None
+        self.value = False
+
+    def update(self):
+        try:
+            if self.inp[0][0].value is True or self.inp[1][0].value is True:
+                self.value = True
+            else:
+                self.value = False
+        except AttributeError:
+            self.value = False
+
+
+class NorGate(Basic):
+    def __init__(self, *args):
+        super(NorGate, self).__init__(*args)
+        self.inp = [[""], [""]]
+        self.out = None
+        self.value = False
+
+    def update(self):
+        try:
+            if self.inp[0][0].value is False and self.inp[1][0].value is False:
+                self.value = True
+            else:
+                self.value = False
+        except AttributeError:
+            self.value = False
+
+
+class XnorGate(Basic):
+    def __init__(self, *args):
+        super(XnorGate, self).__init__(*args)
+        self.inp = [[""], [""]]
+        self.out = None
+        self.value = False
+
+    def update(self):
+        try:
+            if self.inp[0][0].value is self.inp[1][0].value:
+                self.value = True
+            else:
+                self.value = False
+        except AttributeError:
+            self.value = False
+
+
+class XorGate(Basic):
+    def __init__(self, *args):
+        super(XorGate, self).__init__(*args)
+        self.inp = [[""], [""]]
+        self.out = None
+        self.value = False
+
+    def update(self):
+        try:
+            if self.inp[0][0].value is not self.inp[1][0].value:
+                self.value = True
+            else:
+                self.value = False
+        except AttributeError:
+            self.value = False
+
 
 class Button(Basic):
     def __init__(self, *args, panel):
@@ -88,8 +175,8 @@ class Switch:
 
     def click(self, mouse_pos):
         return (
-                self.pos[0] < mouse_pos[0] < self.pos[0] + self.size[0]
-                and self.pos[1] < mouse_pos[1] < self.pos[1] + self.size[1]
+            self.pos[0] < mouse_pos[0] < self.pos[0] + self.size[0]
+            and self.pos[1] < mouse_pos[1] < self.pos[1] + self.size[1]
         )
 
     def update(self):
@@ -118,8 +205,8 @@ class Led:
 
     def click(self, mouse_pos):
         return (
-                self.pos[0] < mouse_pos[0] < self.pos[0] + self.size[0]
-                and self.pos[1] < mouse_pos[1] < self.pos[1] + self.size[1]
+            self.pos[0] < mouse_pos[0] < self.pos[0] + self.size[0]
+            and self.pos[1] < mouse_pos[1] < self.pos[1] + self.size[1]
         )
 
     def update(self):

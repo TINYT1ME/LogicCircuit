@@ -1,6 +1,19 @@
 import pygame
 from colors import *
-from classes import Basic, Button, NotGate, Switch, Wire, Led, AndGate
+from classes import (
+    Basic,
+    Button,
+    NotGate,
+    Switch,
+    Wire,
+    Led,
+    AndGate,
+    OrGate,
+    NorGate,
+    XorGate,
+    NandGate,
+    XnorGate,
+)
 
 pygame.display.set_caption("Logic Gates and what not")
 FPS = 60
@@ -87,23 +100,83 @@ NOT_GATE_BUTTON = Button(
 AND_GATE_BUTTON = Button(
     (int(WIDTH * 0.1108 * 2), int((HEIGHT * 0.1) / 2) - int(WIDTH * 0.01385)),
     BASIC_SIZE,
-    BLUE,
+    LIGHT_GREEN,
     "And",
     font,
     panel=BUTTON_PANEL,
 )
+OR_GATE_BUTTON = Button(
+    (int(WIDTH * 0.1108 * 3), int((HEIGHT * 0.1) / 2) - int(WIDTH * 0.01385)),
+    BASIC_SIZE,
+    LIGHT_YELLOW,
+    "Or",
+    font,
+    panel=BUTTON_PANEL,
+)
+NOR_GATE_BUTTON = Button(
+    (int(WIDTH * 0.1108 * 4), int((HEIGHT * 0.1) / 2) - int(WIDTH * 0.01385)),
+    BASIC_SIZE,
+    LIGHT_ORANGE,
+    "Nor",
+    font,
+    panel=BUTTON_PANEL,
+)
+XOR_GATE_BUTTON = Button(
+    (int(WIDTH * 0.1108 * 5), int((HEIGHT * 0.1) / 2) - int(WIDTH * 0.01385)),
+    BASIC_SIZE,
+    LIGHT_PURPLE,
+    "Xor",
+    font,
+    panel=BUTTON_PANEL,
+)
+NAND_GATE_BUTTON = Button(
+    (int(WIDTH * 0.1108 * 6), int((HEIGHT * 0.1) / 2) - int(WIDTH * 0.01385)),
+    BASIC_SIZE,
+    LIGHT_PINK,
+    "Nand",
+    font,
+    panel=BUTTON_PANEL,
+)
+XNOR_GATE_BUTTON = Button(
+    (int(WIDTH * 0.1108 * 7), int((HEIGHT * 0.1) / 2) - int(WIDTH * 0.01385)),
+    BASIC_SIZE,
+    TEA_GREEN,
+    "Xnor",
+    font,
+    panel=BUTTON_PANEL,
+)
+
+
 not_gates = []
 and_gates = []
+or_gates = []
+nor_gates = []
+xor_gates = []
+nand_gates = []
+xnor_gates = []
 leds = []
 wires = []
 switches = []
-buttons = [NOT_GATE_BUTTON, AND_GATE_BUTTON]
+buttons = [
+    NOT_GATE_BUTTON,
+    AND_GATE_BUTTON,
+    OR_GATE_BUTTON,
+    NOR_GATE_BUTTON,
+    XOR_GATE_BUTTON,
+    NAND_GATE_BUTTON,
+    XNOR_GATE_BUTTON,
+]
 
 object_list = {
     1: [NotGate, not_gates, BASIC_SIZE, "Not", BLUE, NOT_GATE_BUTTON],
     2: [Switch, switches, SWITCH_SIZE, "Switch", None, None],
     3: [Led, leds, LED_SIZE, "LED", None, None],
-    4: [AndGate, and_gates, BASIC_SIZE, "And", BLUE, AND_GATE_BUTTON],
+    4: [AndGate, and_gates, BASIC_SIZE, "And", LIGHT_GREEN, AND_GATE_BUTTON],
+    5: [OrGate, or_gates, BASIC_SIZE, "Or", LIGHT_YELLOW, OR_GATE_BUTTON],
+    6: [NorGate, nor_gates, BASIC_SIZE, "Nor", LIGHT_ORANGE, NOR_GATE_BUTTON],
+    7: [XorGate, xor_gates, BASIC_SIZE, "Xor", LIGHT_PURPLE, XOR_GATE_BUTTON],
+    8: [NandGate, nand_gates, BASIC_SIZE, "Nand", LIGHT_PINK, NAND_GATE_BUTTON],
+    9: [XnorGate, xnor_gates, BASIC_SIZE, "Xnor", TEA_GREEN, XNOR_GATE_BUTTON],
 }
 
 
@@ -117,15 +190,11 @@ def led_handler(pos, event):
     # LEFT CLICK
     if event.button == 1:
         if LED_ADD_BUTTON.click(pos) and len(leds) < 12:
-            leds.append(
-                Led(
-                    (0, int(HEIGHT * 0.06) * len(leds)), LED_SIZE, LED_PANEL
-                )
-            )
+            leds.append(Led((0, int(HEIGHT * 0.06) * len(leds)), LED_SIZE, LED_PANEL))
         elif LED_REMOVE_BUTTON.click(pos):
             # Removes wire connected to led
             try:
-                wires.remove(leds[len(leds) - 1].inp1)
+                wires.remove(leds[len(leds) - 1].inp[0][0])
             except (ValueError, IndexError):
                 pass
 
@@ -234,6 +303,21 @@ def draw_window(fps: int):
         gate.draw(WIN)
 
     for gate in and_gates:
+        gate.draw(WIN)
+
+    for gate in or_gates:
+        gate.draw(WIN)
+
+    for gate in nor_gates:
+        gate.draw(WIN)
+
+    for gate in nand_gates:
+        gate.draw(WIN)
+
+    for gate in xor_gates:
+        gate.draw(WIN)
+
+    for gate in xnor_gates:
         gate.draw(WIN)
 
     for wire in wires:
