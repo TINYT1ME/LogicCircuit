@@ -17,12 +17,13 @@ class Basic:
         self.color = color
         self.font = font
         self.surf = pygame.Surface(self.size)
-        self.text = font.render(text, False, (0, 0, 0))
+        self.text = text
+        self.textsurf = font.render(self.text, False, (0, 0, 0))
         self.surf.fill(color)
 
     def draw(self, window):
         window.blit(self.surf, self.pos)
-        window.blit(self.text, self.pos)
+        window.blit(self.textsurf, self.pos)
 
     def click(self, mouse_pos):
         return (
@@ -31,128 +32,35 @@ class Basic:
         )
 
 
-class NotGate(Basic):
-    def __init__(self, *args):
-        super(NotGate, self).__init__(*args)
-        self.inp = [[""]]
+# Class for logic gates
+class BasicGate(Basic):
+    def __init__(self, *args, logic, total_inp):
+        super(BasicGate, self).__init__(*args)
+        self.logic = logic
         self.out = None
         self.value = False
+        self.inp = []
+        for i in range(total_inp):
+            self.inp.append([""])
 
     def update(self):
         try:
-            self.value = not self.inp[0][0].value
+            self.value = self.logic(self.inp)
         except AttributeError:
             self.value = False
 
 
-class AndGate(Basic):
-    def __init__(self, *args):
-        super(AndGate, self).__init__(*args)
-        self.inp = [[""], [""]]
-        self.out = None
-        self.value = False
-
-    def update(self):
-        try:
-            if self.inp[0][0].value is True and self.inp[1][0].value is True:
-                self.value = True
-            else:
-                self.value = False
-        except AttributeError:
-            self.value = False
-
-
-class NandGate(Basic):
-    def __init__(self, *args):
-        super(NandGate, self).__init__(*args)
-        self.inp = [[""], [""]]
-        self.out = None
-        self.value = False
-
-    def update(self):
-        try:
-            if self.inp[0][0].value is True and self.inp[1][0].value is True:
-                self.value = False
-            else:
-                self.value = True
-        except AttributeError:
-            self.value = False
-
-
-class OrGate(Basic):
-    def __init__(self, *args):
-        super(OrGate, self).__init__(*args)
-        self.inp = [[""], [""]]
-        self.out = None
-        self.value = False
-
-    def update(self):
-        try:
-            if self.inp[0][0].value is True or self.inp[1][0].value is True:
-                self.value = True
-            else:
-                self.value = False
-        except AttributeError:
-            self.value = False
-
-
-class NorGate(Basic):
-    def __init__(self, *args):
-        super(NorGate, self).__init__(*args)
-        self.inp = [[""], [""]]
-        self.out = None
-        self.value = False
-
-    def update(self):
-        try:
-            if self.inp[0][0].value is False and self.inp[1][0].value is False:
-                self.value = True
-            else:
-                self.value = False
-        except AttributeError:
-            self.value = False
-
-
-class XnorGate(Basic):
-    def __init__(self, *args):
-        super(XnorGate, self).__init__(*args)
-        self.inp = [[""], [""]]
-        self.out = None
-        self.value = False
-
-    def update(self):
-        try:
-            if self.inp[0][0].value is self.inp[1][0].value:
-                self.value = True
-            else:
-                self.value = False
-        except AttributeError:
-            self.value = False
-
-
-class XorGate(Basic):
-    def __init__(self, *args):
-        super(XorGate, self).__init__(*args)
-        self.inp = [[""], [""]]
-        self.out = None
-        self.value = False
-
-    def update(self):
-        try:
-            if self.inp[0][0].value is not self.inp[1][0].value:
-                self.value = True
-            else:
-                self.value = False
-        except AttributeError:
-            self.value = False
-
-
+# Class for buttons
 class Button(Basic):
-    def __init__(self, *args, panel):
+    def __init__(self, *args, panel, gate_list=None, total_inp=None, logic=None):
         super(Button, self).__init__(*args)
+        self.gate_list = gate_list
+        self.total_inp = total_inp
+        self.logic = logic
         self.pos = (panel.pos[0] + int(self.pos[0]), int(panel.pos[1] + self.pos[1]))
 
 
+# Class for switches
 class Switch:
     def __init__(self, pos: tuple, size: tuple, panel):
         self.panel = panel
@@ -183,6 +91,7 @@ class Switch:
         pass
 
 
+# Class for buttons
 class Led:
     def __init__(self, pos: tuple, size: tuple, panel):
         self.panel = panel
@@ -213,6 +122,7 @@ class Led:
         self.value = self.inp[0][0].value
 
 
+# Class for wires
 class Wire:
     def __init__(self, start: tuple, end: tuple, inp, out):
         self.start = start

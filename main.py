@@ -1,31 +1,42 @@
 import pygame
 from colors import *
+from logic import *
 from classes import (
     Basic,
     Button,
-    NotGate,
     Switch,
     Wire,
     Led,
-    AndGate,
-    OrGate,
-    NorGate,
-    XorGate,
-    NandGate,
-    XnorGate,
+    BasicGate,
 )
 
+# Setting name, fps, and font
 pygame.display.set_caption("Logic Gates and what not")
 FPS = 60
 pygame.font.init()
 fps_font = pygame.font.SysFont("Arial", 15)
 font = pygame.font.SysFont("adobegothicstdkalin", 20)
 
+# Defining constant variables
 WIDTH, HEIGHT = 900, 500
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 BASIC_SIZE = (int(WIDTH * 0.0277 * 2), int(WIDTH * 0.0277))
 SWITCH_SIZE = (int(WIDTH * 0.0277 * 2), int(WIDTH * 0.0277))
 LED_SIZE = (int(WIDTH * 0.0277 * 2), int(WIDTH * 0.0277))
+
+# Creating circle for when object is pressed
+circle = pygame.Surface((20, 20), pygame.SRCALPHA)
+pygame.draw.circle(circle, (123, 123, 123, 255), (10, 10), 10)
+
+# Defining temporary variables
+selected = None
+first_gate = None
+
+# Defining gates
+gates = []
+leds = []
+wires = []
+switches = []
 
 # Defining panels
 BUTTON_PANEL = Basic(
@@ -47,12 +58,7 @@ LED_PANEL = Basic(
     font,
 )
 
-selected = None
-first_gate = None
-
-circle = pygame.Surface((20, 20), pygame.SRCALPHA)
-pygame.draw.circle(circle, (123, 123, 123, 255), (10, 10), 10)
-
+# Switch add/remove buttons
 SWITCH_ADD_BUTTON = Button(
     (0, -(int((HEIGHT * 0.15) / 2) - int(WIDTH * 0.01385) + BASIC_SIZE[1] + 2)),
     BASIC_SIZE,
@@ -61,7 +67,6 @@ SWITCH_ADD_BUTTON = Button(
     font,
     panel=SWITCH_PANEL,
 )
-
 SWITCH_REMOVE_BUTTON = Button(
     (0, -(int((HEIGHT * 0.15) / 2) - int(WIDTH * 0.01385))),
     BASIC_SIZE,
@@ -71,6 +76,7 @@ SWITCH_REMOVE_BUTTON = Button(
     panel=SWITCH_PANEL,
 )
 
+# Led add/remove buttons
 LED_ADD_BUTTON = Button(
     (0, -(int((HEIGHT * 0.15) / 2) - int(WIDTH * 0.01385) + BASIC_SIZE[1] + 2)),
     BASIC_SIZE,
@@ -79,7 +85,6 @@ LED_ADD_BUTTON = Button(
     font,
     panel=LED_PANEL,
 )
-
 LED_REMOVE_BUTTON = Button(
     (0, -(int((HEIGHT * 0.15) / 2) - int(WIDTH * 0.01385))),
     BASIC_SIZE,
@@ -89,6 +94,7 @@ LED_REMOVE_BUTTON = Button(
     panel=LED_PANEL,
 )
 
+# Logic gate buttons
 NOT_GATE_BUTTON = Button(
     (int(WIDTH * 0.1108), int((HEIGHT * 0.1) / 2) - int(WIDTH * 0.01385)),
     BASIC_SIZE,
@@ -96,6 +102,9 @@ NOT_GATE_BUTTON = Button(
     "Not",
     font,
     panel=BUTTON_PANEL,
+    gate_list=gates,
+    total_inp=1,
+    logic=not_gate_logic,
 )
 AND_GATE_BUTTON = Button(
     (int(WIDTH * 0.1108 * 2), int((HEIGHT * 0.1) / 2) - int(WIDTH * 0.01385)),
@@ -104,6 +113,9 @@ AND_GATE_BUTTON = Button(
     "And",
     font,
     panel=BUTTON_PANEL,
+    gate_list=gates,
+    total_inp=2,
+    logic=and_gate_logic,
 )
 OR_GATE_BUTTON = Button(
     (int(WIDTH * 0.1108 * 3), int((HEIGHT * 0.1) / 2) - int(WIDTH * 0.01385)),
@@ -112,6 +124,9 @@ OR_GATE_BUTTON = Button(
     "Or",
     font,
     panel=BUTTON_PANEL,
+    gate_list=gates,
+    total_inp=2,
+    logic=or_gate_logic,
 )
 NOR_GATE_BUTTON = Button(
     (int(WIDTH * 0.1108 * 4), int((HEIGHT * 0.1) / 2) - int(WIDTH * 0.01385)),
@@ -120,6 +135,9 @@ NOR_GATE_BUTTON = Button(
     "Nor",
     font,
     panel=BUTTON_PANEL,
+    gate_list=gates,
+    total_inp=2,
+    logic=nor_gate_logic,
 )
 XOR_GATE_BUTTON = Button(
     (int(WIDTH * 0.1108 * 5), int((HEIGHT * 0.1) / 2) - int(WIDTH * 0.01385)),
@@ -128,6 +146,9 @@ XOR_GATE_BUTTON = Button(
     "Xor",
     font,
     panel=BUTTON_PANEL,
+    gate_list=gates,
+    total_inp=2,
+    logic=xor_gate_logic,
 )
 NAND_GATE_BUTTON = Button(
     (int(WIDTH * 0.1108 * 6), int((HEIGHT * 0.1) / 2) - int(WIDTH * 0.01385)),
@@ -136,6 +157,9 @@ NAND_GATE_BUTTON = Button(
     "Nand",
     font,
     panel=BUTTON_PANEL,
+    gate_list=gates,
+    total_inp=2,
+    logic=nand_gate_logic,
 )
 XNOR_GATE_BUTTON = Button(
     (int(WIDTH * 0.1108 * 7), int((HEIGHT * 0.1) / 2) - int(WIDTH * 0.01385)),
@@ -144,19 +168,12 @@ XNOR_GATE_BUTTON = Button(
     "Xnor",
     font,
     panel=BUTTON_PANEL,
+    gate_list=gates,
+    total_inp=2,
+    logic=xnor_gate_logic,
 )
 
 
-not_gates = []
-and_gates = []
-or_gates = []
-nor_gates = []
-xor_gates = []
-nand_gates = []
-xnor_gates = []
-leds = []
-wires = []
-switches = []
 buttons = [
     NOT_GATE_BUTTON,
     AND_GATE_BUTTON,
@@ -167,18 +184,6 @@ buttons = [
     XNOR_GATE_BUTTON,
 ]
 
-object_list = {
-    1: [NotGate, not_gates, BASIC_SIZE, "Not", BLUE, NOT_GATE_BUTTON],
-    2: [Switch, switches, SWITCH_SIZE, "Switch", None, None],
-    3: [Led, leds, LED_SIZE, "LED", None, None],
-    4: [AndGate, and_gates, BASIC_SIZE, "And", LIGHT_GREEN, AND_GATE_BUTTON],
-    5: [OrGate, or_gates, BASIC_SIZE, "Or", LIGHT_YELLOW, OR_GATE_BUTTON],
-    6: [NorGate, nor_gates, BASIC_SIZE, "Nor", LIGHT_ORANGE, NOR_GATE_BUTTON],
-    7: [XorGate, xor_gates, BASIC_SIZE, "Xor", LIGHT_PURPLE, XOR_GATE_BUTTON],
-    8: [NandGate, nand_gates, BASIC_SIZE, "Nand", LIGHT_PINK, NAND_GATE_BUTTON],
-    9: [XnorGate, xnor_gates, BASIC_SIZE, "Xnor", TEA_GREEN, XNOR_GATE_BUTTON],
-}
-
 
 # Updates logic
 def update():
@@ -186,6 +191,7 @@ def update():
         wire.update()
 
 
+# Handling led creation/deletion
 def led_handler(pos, event):
     # LEFT CLICK
     if event.button == 1:
@@ -205,6 +211,7 @@ def led_handler(pos, event):
                 pass
 
 
+# Handling switch creation/deletion
 def switch_handler(pos, event):
     # LEFT CLICK
     if event.button == 1:
@@ -235,37 +242,7 @@ def switch_handler(pos, event):
                 switch.value = not switch.value
 
 
-def wire_handler(pos, event):
-    global selected
-    global first_gate
-
-    # LEFT CLICK
-    if event.button == 1 and selected is None:
-        for obj in object_list:
-            for out in object_list[obj][1]:
-                if out.click(pos):
-                    if first_gate:
-                        for inputs in out.inp:
-                            if inputs[0] == "":
-                                wire = Wire(
-                                    (
-                                        first_gate.pos[0] + first_gate.size[0],
-                                        first_gate.pos[1],
-                                    ),
-                                    out.pos,
-                                    first_gate,
-                                    out,
-                                )
-                                wires.append(wire)
-                                wire.inp.out = wire
-                                inputs[0] = wire
-                                first_gate = None
-                                # breaking due to gates with multiple inputs
-                                break
-                    else:
-                        first_gate = out
-
-
+# Handing gate creation
 def gates_handler(pos, event):
     global selected
 
@@ -273,22 +250,93 @@ def gates_handler(pos, event):
     if event.button == 1:
         # Creating gates
         if selected and not BUTTON_PANEL.click(pos):
-            temp = selected[0](
+            temp = BasicGate(
                 (pos[0] - 15, pos[1] - 15),
-                selected[2],
-                selected[4],
-                selected[3],
+                BASIC_SIZE,
+                selected.color,
+                selected.text,
                 font,
+                logic=selected.logic,
+                total_inp=selected.total_inp,
             )
-            selected[1].append(temp)
+            gates.append(temp)
             selected = None
-        for obj in object_list:
-            if object_list[obj][5] is not None:
-                if object_list[obj][5].click(pos):
-                    selected = object_list[obj]
+        for button in buttons:
+            if button.click(pos):
+                selected = button
+                break
+
+
+# Handing wire creation and attachment to other objects
+def wire_handler(pos, event):
+    global selected
+    global first_gate
+
+    # LEFT CLICK
+    if event.button == 1 and selected is None:
+
+        # Gates
+        for gate in gates:
+            if gate.click(pos):
+                if first_gate:
+                    for inputs in gate.inp:
+                        if inputs[0] == "":
+                            # Creating wire
+                            wire = Wire(
+                                (
+                                    first_gate.pos[0] + first_gate.size[0],
+                                    first_gate.pos[1],
+                                ),
+                                gate.pos,
+                                first_gate,
+                                gate,
+                            )
+
+                            # Adding wire to wires array
+                            wires.append(wire)
+                            wire.inp.out = wire
+
+                            # Setting led input to wire
+                            inputs[0] = wire
+                            first_gate = None
+                            break
+                else:
+                    # Assigning first_gate to currently clicked gate
+                    first_gate = gate
+
+        # Switches
+        if first_gate is None:
+            for switch in switches:
+                if switch.click(pos):
+                    first_gate = switch
+                    break
+
+        # Leds
+        if first_gate:
+            for led in leds:
+                if led.click(pos):
+                    # Creating wire
+                    wire = Wire(
+                        (
+                            first_gate.pos[0] + first_gate.size[0],
+                            first_gate.pos[1],
+                        ),
+                        led.pos,
+                        first_gate,
+                        led,
+                    )
+
+                    # Adding wire to wires array
+                    wires.append(wire)
+                    wire.inp.out = wire
+
+                    # Setting led input to wire
+                    led.inp[0][0] = wire
+                    first_gate = None
                     break
 
 
+# Handling window drawing
 def draw_window(fps: int):
     x, y = pygame.mouse.get_pos()
 
@@ -298,26 +346,8 @@ def draw_window(fps: int):
     SWITCH_PANEL.draw(WIN)
     LED_PANEL.draw(WIN)
 
-    # draw not gates
-    for gate in not_gates:
-        gate.draw(WIN)
-
-    for gate in and_gates:
-        gate.draw(WIN)
-
-    for gate in or_gates:
-        gate.draw(WIN)
-
-    for gate in nor_gates:
-        gate.draw(WIN)
-
-    for gate in nand_gates:
-        gate.draw(WIN)
-
-    for gate in xor_gates:
-        gate.draw(WIN)
-
-    for gate in xnor_gates:
+    # draw objects
+    for gate in gates:
         gate.draw(WIN)
 
     for wire in wires:
@@ -329,9 +359,11 @@ def draw_window(fps: int):
     for led in leds:
         led.draw(WIN)
 
-    # draw option buttons
+    # draw logic gate buttons
     for button in buttons:
         button.draw(WIN)
+
+    # draw switch & led buttons
     SWITCH_ADD_BUTTON.draw(WIN)
     SWITCH_REMOVE_BUTTON.draw(WIN)
     LED_ADD_BUTTON.draw(WIN)
@@ -349,6 +381,7 @@ def draw_window(fps: int):
     pygame.display.update()
 
 
+# Handling clicks
 def click(pos, event):
     led_handler(pos, event)
     switch_handler(pos, event)
