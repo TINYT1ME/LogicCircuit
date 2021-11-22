@@ -25,7 +25,7 @@ def or_gate_logic(inp):
 
 
 def nor_gate_logic(inp):
-    if inp[0][0].value is False and inp[1][0].value is True:
+    if inp[0][0].value is False and inp[1][0].value is False:
         return True
     else:
         return False

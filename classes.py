@@ -136,8 +136,15 @@ class Wire:
             pygame.draw.line(window, (255, 255, 0), self.start, self.end, 5)
         else:
             pygame.draw.line(window, (255, 255, 255), self.start, self.end, 5)
-
+    
     def update(self):
         self.inp.update()
         self.value = self.inp.value
         self.out.update()
+
+    def disconnect(self):
+        # Remove wire from output's input
+        for inputs in self.out.inp:
+            if inputs[0] is self:
+                inputs[0] = ""
+                break 

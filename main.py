@@ -190,6 +190,8 @@ def update():
     for wire in wires:
         wire.update()
 
+def wire_remove(wire):
+    pass
 
 # Handling led creation/deletion
 def led_handler(pos, event):
@@ -198,18 +200,18 @@ def led_handler(pos, event):
         if LED_ADD_BUTTON.click(pos) and len(leds) < 12:
             leds.append(Led((0, int(HEIGHT * 0.06) * len(leds)), LED_SIZE, LED_PANEL))
         elif LED_REMOVE_BUTTON.click(pos):
-            # Removes wire connected to led
-            try:
-                wires.remove(leds[len(leds) - 1].inp[0][0])
-            except (ValueError, IndexError):
-                pass
+            # Delete connected wires
+            temp_wires = []
+            for wire in wires:
+                if leds and wire.out is leds[len(leds) - 1]:
+                    temp_wires.append(wire) 
+            for wire in temp_wires:
+                wires.remove(wire)
+                wire.disconnect()
 
             # Remove led
-            try:
+            if leds:
                 leds.pop()
-            except IndexError:
-                pass
-
 
 # Handling switch creation/deletion
 def switch_handler(pos, event):
@@ -223,17 +225,18 @@ def switch_handler(pos, event):
                 )
             )
         elif SWITCH_REMOVE_BUTTON.click(pos):
-            # Removes wire connected to switch
-            try:
-                wires.remove(switches[len(switches) - 1].out)
-            except (ValueError, IndexError):
-                pass
+            # Delete connected wires
+            temp_wires = []
+            for wire in wires:
+                if switches and wire.inp is switches[len(switches) - 1]:
+                    temp_wires.append(wire)
+            for wire in temp_wires:
+                wires.remove(wire)
+                wire.disconnect()
 
             # Remove switch
-            try:
+            if switches:
                 switches.pop()
-            except IndexError:
-                pass
     # MIDDLE CLICK
     elif event.button == 2:
         # Flipping switch value
@@ -242,7 +245,7 @@ def switch_handler(pos, event):
                 switch.value = not switch.value
 
 
-# Handing gate creation
+# Handing gate creation/deletion
 def gates_handler(pos, event):
     global selected
 
@@ -265,7 +268,24 @@ def gates_handler(pos, event):
             if button.click(pos):
                 selected = button
                 break
+    # RIGHT CLICK
+    elif event.button == 3:
+        for gate in gates:
+            if gate.click(pos):    
+                # Delete connected wires
+                temp_wires = []
+                for inputs in gate.inp:
+                    if inputs[0]:
+                        temp_wires.append(inputs[0]) 
+                for wire in wires:
+                    if wire.inp is gate:
+                        temp_wires.append(wire)
+                for wire in temp_wires:
+                    wires.remove(wire)
+                    wire.disconnect()
 
+                # remove gate
+                gates.remove(gate)
 
 # Handing wire creation and attachment to other objects
 def wire_handler(pos, event):
