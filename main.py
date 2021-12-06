@@ -16,6 +16,8 @@ FPS = 60
 pygame.font.init()
 fps_font = pygame.font.SysFont("Arial", 15)
 font = pygame.font.SysFont("adobegothicstdkalin", 20)
+img = pygame.image.load('logo.png')
+pygame.display.set_icon(img)
 
 # Defining constant variables
 WIDTH, HEIGHT = 900, 500
@@ -31,6 +33,7 @@ pygame.draw.circle(circle, (123, 123, 123, 255), (10, 10), 10)
 # Defining temporary variables
 selected = None
 first_gate = None
+temp_points = []
 
 # Defining gates
 gates = []
@@ -190,8 +193,6 @@ def update():
     for wire in wires:
         wire.update()
 
-def wire_remove(wire):
-    pass
 
 # Handling led creation/deletion
 def led_handler(pos, event):
@@ -204,7 +205,7 @@ def led_handler(pos, event):
             temp_wires = []
             for wire in wires:
                 if leds and wire.out is leds[len(leds) - 1]:
-                    temp_wires.append(wire) 
+                    temp_wires.append(wire)
             for wire in temp_wires:
                 wires.remove(wire)
                 wire.disconnect()
@@ -213,8 +214,12 @@ def led_handler(pos, event):
             if leds:
                 leds.pop()
 
+
 # Handling switch creation/deletion
 def switch_handler(pos, event):
+    global selected
+    global first_gate
+
     # LEFT CLICK
     if event.button == 1:
         # Creating/removing switches
@@ -225,6 +230,10 @@ def switch_handler(pos, event):
                 )
             )
         elif SWITCH_REMOVE_BUTTON.click(pos):
+            # Unselecting all gates when deleting
+            selected = None
+            first_gate = None
+
             # Delete connected wires
             temp_wires = []
             for wire in wires:
@@ -237,17 +246,19 @@ def switch_handler(pos, event):
             # Remove switch
             if switches:
                 switches.pop()
-    # MIDDLE CLICK
-    elif event.button == 2:
-        # Flipping switch value
-        for switch in switches:
-            if switch.click(pos):
-                switch.value = not switch.value
+        # MIDDLE CLICK
+        elif event.button == 2:
+            # Flipping switch value
+            for switch in switches:
+                if switch.click(pos):
+                    switch.value = not switch.value
 
 
 # Handing gate creation/deletion
 def gates_handler(pos, event):
     global selected
+    global first_gate
+    global temp_points
 
     # LEFT CLICK
     if event.button == 1:
@@ -271,12 +282,17 @@ def gates_handler(pos, event):
     # RIGHT CLICK
     elif event.button == 3:
         for gate in gates:
-            if gate.click(pos):    
-                # Delete connected wires
+            if gate.click(pos):
+                # Unselecting all gates when deleting
+                selected = None
+                first_gate = None
+
+                # Delete connected wires & remove temp_points
                 temp_wires = []
+                temp_points = []
                 for inputs in gate.inp:
                     if inputs[0]:
-                        temp_wires.append(inputs[0]) 
+                        temp_wires.append(inputs[0])
                 for wire in wires:
                     if wire.inp is gate:
                         temp_wires.append(wire)
@@ -284,32 +300,34 @@ def gates_handler(pos, event):
                     wires.remove(wire)
                     wire.disconnect()
 
-                # remove gate
-                gates.remove(gate)
+            # remove gate
+            gates.remove(gate)
+
 
 # Handing wire creation and attachment to other objects
 def wire_handler(pos, event):
     global selected
     global first_gate
+    global temp_points
 
     # LEFT CLICK
-    if event.button == 1 and selected is None:
-
+    if event.button == 1 and selected is None and not BUTTON_PANEL.click(pygame.mouse.get_pos()):
         # Gates
         for gate in gates:
             if gate.click(pos):
                 if first_gate:
                     for inputs in gate.inp:
                         if inputs[0] == "":
+                            # Adding input gate's position
+                            if len(temp_points) > 1:
+                                temp_points.pop()
+                            temp_points.append(gate.pos)
+
                             # Creating wire
                             wire = Wire(
-                                (
-                                    first_gate.pos[0] + first_gate.size[0],
-                                    first_gate.pos[1],
-                                ),
-                                gate.pos,
                                 first_gate,
                                 gate,
+                                temp_points,
                             )
 
                             # Adding wire to wires array
@@ -319,31 +337,41 @@ def wire_handler(pos, event):
                             # Setting led input to wire
                             inputs[0] = wire
                             first_gate = None
+                            temp_points = []
                             break
                 else:
                     # Assigning first_gate to currently clicked gate
                     first_gate = gate
+            elif first_gate:
+                if not temp_points:
+                    # Adding first gate's output position
+                    temp_points.append(
+                        (first_gate.pos[0] + first_gate.size[0], first_gate.pos[1])
+                    )
+                else:
+                    temp_points.append(pos)
 
         # Switches
         if first_gate is None:
             for switch in switches:
                 if switch.click(pos):
                     first_gate = switch
+                    temp_points.append(
+                        (first_gate.pos[0] + first_gate.size[0], first_gate.pos[1])
+                    )
                     break
 
         # Leds
         if first_gate:
             for led in leds:
                 if led.click(pos):
+                    temp_points.append(led.pos)
+
                     # Creating wire
                     wire = Wire(
-                        (
-                            first_gate.pos[0] + first_gate.size[0],
-                            first_gate.pos[1],
-                        ),
-                        led.pos,
                         first_gate,
                         led,
+                        temp_points,
                     )
 
                     # Adding wire to wires array
@@ -353,6 +381,7 @@ def wire_handler(pos, event):
                     # Setting led input to wire
                     led.inp[0][0] = wire
                     first_gate = None
+                    temp_points = []
                     break
 
 

@@ -52,7 +52,7 @@ class BasicGate(Basic):
 
 # Class for buttons
 class Button(Basic):
-    def __init__(self, *args, panel, gate_list=None, total_inp=None, logic=None):
+    def __init__(self, *args, panel: Basic , gate_list=None, total_inp=None, logic=None):
         super(Button, self).__init__(*args)
         self.gate_list = gate_list
         self.total_inp = total_inp
@@ -124,19 +124,35 @@ class Led:
 
 # Class for wires
 class Wire:
-    def __init__(self, start: tuple, end: tuple, inp, out):
-        self.start = start
-        self.end = end
+    def __init__(self, inp, out, temp_points):
         self.inp = inp
         self.out = out
         self.value = inp.value
+        self.points = []
+        self.points = temp_points
+        self.radius = 5
 
     def draw(self, window):
-        if self.value:
-            pygame.draw.line(window, (255, 255, 0), self.start, self.end, 5)
-        else:
-            pygame.draw.line(window, (255, 255, 255), self.start, self.end, 5)
-    
+
+        # Iterate through the points in the list and draw a line between them
+        for i in range(len(self.points) - 1):
+            if self.value:
+                pygame.draw.line(
+                    window,
+                    (255, 255, 0),
+                    (int(self.points[i][0]), int(self.points[i][1])),
+                    (int(self.points[i + 1][0]), int(self.points[i + 1][1])),
+                    self.radius,
+                )
+            else:
+                pygame.draw.line(
+                    window,
+                    (255, 255, 255),
+                    (int(self.points[i][0]), int(self.points[i][1])),
+                    (int(self.points[i + 1][0]), int(self.points[i + 1][1])),
+                    self.radius,
+                )
+
     def update(self):
         self.inp.update()
         self.value = self.inp.value
@@ -147,4 +163,4 @@ class Wire:
         for inputs in self.out.inp:
             if inputs[0] is self:
                 inputs[0] = ""
-                break 
+                break
