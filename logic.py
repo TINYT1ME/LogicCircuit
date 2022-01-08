@@ -5,7 +5,6 @@ def not_gate_logic(inp):
 
 def and_gate_logic(inp):
     return inp[0].value and inp[1].value
-    #return inp[0].value * inp[1].value
 
 
 def nand_gate_logic(inp):

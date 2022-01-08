@@ -1,4 +1,6 @@
 import pygame
+
+# import gc
 from colors import *
 from logic import *
 from classes import (
@@ -176,7 +178,6 @@ XNOR_GATE_BUTTON = Button(
     logic=xnor_gate_logic,
 )
 
-
 buttons = [
     NOT_GATE_BUTTON,
     AND_GATE_BUTTON,
@@ -211,19 +212,13 @@ def led_handler(pos, event):
     if event.button == 1:
         if LED_ADD_BUTTON.click(pos) and len(leds) < 12:
             leds.append(Led((0, int(HEIGHT * 0.06) * len(leds)), LED_SIZE, LED_PANEL))
-        elif LED_REMOVE_BUTTON.click(pos):
+        elif LED_REMOVE_BUTTON.click(pos) and leds:
             # Delete connected wires
-            temp_wires = []
-            for wire in wires:
-                if leds and wire.out is leds[len(leds) - 1]:
-                    temp_wires.append(wire)
-            for wire in temp_wires:
+            for wire in leds[len(leds) - 1].inp.connected_wires:
                 wires.remove(wire)
-                wire.disconnect()
 
             # Remove led
-            if leds:
-                leds.pop()
+            leds.pop()
 
 
 # Handling switch creation/deletion
@@ -240,23 +235,31 @@ def switch_handler(pos, event):
                     (0, int(HEIGHT * 0.06) * len(switches)), SWITCH_SIZE, SWITCH_PANEL
                 )
             )
-        elif SWITCH_REMOVE_BUTTON.click(pos):
+        elif SWITCH_REMOVE_BUTTON.click(pos) and switches:
             # Unselecting all gates when deleting
             selected = None
             first_gate = None
 
             # Delete connected wires
-            temp_wires = []
-            for wire in wires:
-                if switches and wire.inp is switches[len(switches) - 1]:
-                    temp_wires.append(wire)
-            for wire in temp_wires:
-                wires.remove(wire)
-                wire.disconnect()
+            # for wire in wires:
+            #     if switches and wire.inp is switches[len(switches) - 1]:
+            #         temp_wires.append(wire)
+
+            for switch_wire in switches[len(switches) - 1].out:
+                for gate in gates:  # Parse through gates
+                    for inp in gate.inp:
+                        for wire in inp.connected_wires:
+                            if wire is switch_wire:
+                                switches[len(switches) - 1].out.remove(wire)
+                                wires.remove(wire)
+                                inp.connected_wires.remove(wire)
+                for led in leds:  # Parse through leds
+                    if switch_wire in led.inp.connected_wires:
+                        led.inp.connected_wires.remove(switch_wire)
+                        wires.remove(switch_wire)
 
             # Remove switch
-            if switches:
-                switches.pop()
+            switches.pop()
     # MIDDLE CLICK
     elif event.button == 2:
         # Flipping switch value
@@ -306,11 +309,36 @@ def gates_handler(pos, event):
                 for wire in wires:
                     if wire.inp is gate:
                         temp_wires.append(wire)
-                print(temp_wires)
 
-                for wire in temp_wires:
-                    wires.remove(wire)
-                    wire.disconnect()
+                # Deleting gate's output wires from inputs
+                # Only if gate's output wire goes to another gate
+                for out_gate in gates:
+                    for inp in out_gate.inp:
+                        for wire in inp.connected_wires:
+                            if wire in temp_wires:
+                                temp_wires.remove(wire)
+                                wires.remove(wire)
+                                inp.connected_wires.remove(wire)
+
+                                # Clearing from memory
+                                # del wire
+                                # gc.collect()
+                # Only if gate's output wire goes to an led
+                for led in leds:
+                    for wire in led.inp.connected_wires:
+                        if wire in temp_wires:
+                            temp_wires.remove(wire)
+                            wires.remove(wire)
+                            led.inp.connected_wires.remove(wire)
+
+                # Deleting gate's input wires
+                for inp in gate.inp:
+                    for wire in inp.connected_wires:
+                        wires.remove(wire)
+
+                # for wire in temp_wires:
+                #    wires.remove(wire)
+                #    wire.disconnect()
 
                 # remove gate
                 gates.remove(gate)
@@ -348,11 +376,14 @@ def wire_handler(pos, event):
                             first_gate,
                             temp_points,
                         )
+                        if first_gate in switches:
+                            first_gate.out.append(wire)
+
                         # Adding wire to wires array
                         wires.append(wire)
 
                         # Adding inp to wire(wire getting inp)
-                        wire.inp.out = wire
+                        # wire.inp.out = wire
 
                         # Adding wire to inp(wire connecting to out)
                         inp.connected_wires.append(wire)
@@ -387,6 +418,9 @@ def wire_handler(pos, event):
 
                     # Adding wire to wires array
                     wires.append(wire)
+
+                    if first_gate in switches:
+                        first_gate.out.append(wire)
 
                     # Setting led input to wire
                     led.inp.connected_wires.append(wire)

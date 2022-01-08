@@ -45,7 +45,7 @@ class BasicGate(Basic):
     def __init__(self, *args, logic, total_inp):
         super(BasicGate, self).__init__(*args)
         self.logic = logic  # Assining the gate
-        #self.out = None  # Setting the output wire
+        # self.out = None  # Setting the output wire
         self.io_rect_size = self.size[0] * 0.204  # Size of output and input squares
         self.out_rect = pygame.Rect(
             self.pos[0] + self.size[0],
@@ -76,7 +76,7 @@ class BasicGate(Basic):
         window.blit(self.textsurf, self.pos)
         for inp in self.inp:
             inp.draw(window)
-            #print(f"Value: {inp.value}, Total_inp: {self.total_inp}\n")
+            # print(f"Value: {inp.value}, Total_inp: {self.total_inp}\n")
         pygame.draw.rect(window, WHITE, self.out_rect)
 
     # Return which inputs dont have a connection
@@ -121,7 +121,7 @@ class Switch:
             "Switch", False, (0, 0, 0)
         )
         self.value = False
-        self.out = None
+        self.out = []
 
     def draw(self, window):
         if self.value:
@@ -184,7 +184,7 @@ class Led:
             if wire.value:
                 self.value = True
                 break
-        #for inp in self.inp:
+        # for inp in self.inp:
         #    self.value = False
         #    print(inp.value)
         #    if inp.value is True:
@@ -232,5 +232,5 @@ class Wire:
         for inputs in self.out.inp:
             if inputs[0] is self:
                 inputs.pop()
-                #inputs[0] = ""
+                # inputs[0] = ""
                 break
