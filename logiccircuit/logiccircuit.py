@@ -505,7 +505,3 @@ def main():
         draw_window(int(clock.get_fps()))
 
     pygame.quit()
-
-
-if __name__ == "__main__":
-    main()
