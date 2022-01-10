@@ -1,5 +1,5 @@
 import pygame
-from colors import *
+from logiccircuit.colors import *
 
 
 # Parent class

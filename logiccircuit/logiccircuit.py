@@ -1,9 +1,10 @@
 import pygame
+import os
 
 # import gc
-from colors import *
-from logic import *
-from classes import (
+from logiccircuit.colors import *
+from logiccircuit.logic import *
+from logiccircuit.classes import (
     Basic,
     Button,
     Switch,
@@ -18,7 +19,7 @@ FPS = 60
 pygame.font.init()
 fps_font = pygame.font.SysFont("Arial", 15)
 font = pygame.font.SysFont("adobegothicstdkalin", 20)
-img = pygame.image.load("logo.png")
+img = pygame.image.load(f"{os.path.dirname(os.path.abspath(__file__))}/logo.png")
 pygame.display.set_icon(img)
 
 # Defining constant variables
