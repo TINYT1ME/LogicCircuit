@@ -3,9 +3,10 @@
   Logic Circuit
 </h1>
 
-[![platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20Mac%20%7C%20Linux-%23808080--%2332cd32)](https://github.com/TINYT1ME/GoodUSB/actions)
+[![platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20Mac%20%7C%20Linux-%23808080--%2332cd32)](https://github.com/TINYT1ME/LogicCircuit/)
+[![platforms](https://img.shields.io/badge/linter-black-black)](https://github.com/psf/black)
 <br>
-**LogicCircuit** is a program that helps build simple circuits using logic gates. It is meant to teach people the basics of how logic gates work.
+**LogicCircuit** is a program that helps build/simulate simple circuits using logic gates. It is meant to teach people the basics of how logic gates work.
 
 ---
 
