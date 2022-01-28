@@ -1,5 +1,5 @@
 import pygame
-from logiccircuit.colors import *
+from colors import *
 
 
 # Parent class
@@ -44,8 +44,7 @@ class Input(Basic):
 class BasicGate(Basic):
     def __init__(self, *args, logic, total_inp):
         super(BasicGate, self).__init__(*args)
-        self.logic = logic  # Assining the gate
-        # self.out = None  # Setting the output wire
+        self.logic = logic  # Assigning the gate
         self.io_rect_size = self.size[0] * 0.204  # Size of output and input squares
         self.out_rect = pygame.Rect(
             self.pos[0] + self.size[0],
@@ -76,21 +75,7 @@ class BasicGate(Basic):
         window.blit(self.textsurf, self.pos)
         for inp in self.inp:
             inp.draw(window)
-            # print(f"Value: {inp.value}, Total_inp: {self.total_inp}\n")
         pygame.draw.rect(window, WHITE, self.out_rect)
-
-    # Return which inputs dont have a connection
-    def open_inp(self):
-        for inp in self.inp:
-            if not inp[0]:
-                return inp
-        return None
-
-    # Connect a wire to input
-    def connect_inp(self, wire):
-        for inp in self.inp:
-            if not inp[0]:
-                inp[0].append(wire)
 
     # Update gate value
     def update(self):
@@ -156,7 +141,7 @@ class Led:
         self.inp = Input(
             (
                 self.pos[0] - self.io_rect_size,
-                self.pos[1] + self.size[1] - self.io_rect_size,
+                self.pos[1],
             ),
             (self.io_rect_size, self.io_rect_size),
             WHITE,
@@ -171,12 +156,7 @@ class Led:
             self.surf.fill(WHITE)
         window.blit(self.surf, self.pos)
         window.blit(self.text, self.pos)
-
-    def click(self, mouse_pos):
-        return (
-            self.pos[0] < mouse_pos[0] < self.pos[0] + self.size[0]
-            and self.pos[1] < mouse_pos[1] < self.pos[1] + self.size[1]
-        )
+        self.inp.draw(window)
 
     def update(self):
         self.value = False
@@ -184,12 +164,6 @@ class Led:
             if wire.value:
                 self.value = True
                 break
-        # for inp in self.inp:
-        #    self.value = False
-        #    print(inp.value)
-        #    if inp.value is True:
-        #        self.value = True
-        #        break
 
 
 # Class for wires
@@ -225,12 +199,9 @@ class Wire:
         self.inp.update()
         self.value = self.inp.value
 
-    #        self.out.value = self.inp.value
-
     def disconnect(self):
         # Remove wire from output gate's input
         for inputs in self.out.inp:
             if inputs[0] is self:
                 inputs.pop()
-                # inputs[0] = ""
                 break
