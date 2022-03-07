@@ -1,3 +1,5 @@
+# Colors
+
 BG_COLOR = (113, 137, 179)
 PANEL_COLOR = (179, 155, 113)
 WHITE = (255, 255, 255)

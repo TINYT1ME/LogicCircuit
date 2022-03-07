@@ -1,8 +1,9 @@
+# Classes for Logic Circuit
+
 import pygame
 from colors import *
 
-
-# Parent class
+# parent class
 class Basic:
     def __init__(
         self,
@@ -22,10 +23,12 @@ class Basic:
         self.textsurf = font.render(self.text, False, (0, 0, 0))
         self.surf.fill(color)
 
+    # draw
     def draw(self, window):
         window.blit(self.surf, self.pos)
         window.blit(self.textsurf, self.pos)
 
+    # return positive if clicked on object
     def click(self, mouse_pos):
         return (
             self.pos[0] < mouse_pos[0] < self.pos[0] + self.size[0]
@@ -40,7 +43,7 @@ class Input(Basic):
         self.connected_wires = []
 
 
-# Class for logic gates
+# class for logic gates
 class BasicGate(Basic):
     def __init__(self, *args, logic, total_inp):
         super(BasicGate, self).__init__(*args)
@@ -55,7 +58,7 @@ class BasicGate(Basic):
         self.value = False  # Output value of gate
         self.inp = []
         self.total_inp = total_inp
-        for i in range(total_inp):
+        for i in range(total_inp):  # Creating inputs
             self.inp.append(
                 Input(
                     (
@@ -85,7 +88,7 @@ class BasicGate(Basic):
             self.value = False
 
 
-# Class for buttons
+# class for buttons
 class Button(Basic):
     def __init__(self, *args, panel: Basic, gate_list=None, total_inp=None, logic=None):
         super(Button, self).__init__(*args)
@@ -95,7 +98,7 @@ class Button(Basic):
         self.pos = (panel.pos[0] + int(self.pos[0]), int(panel.pos[1] + self.pos[1]))
 
 
-# Class for switches
+# class for switches
 class Switch:
     def __init__(self, pos: tuple, size: tuple, panel):
         self.panel = panel
@@ -126,7 +129,7 @@ class Switch:
         pass
 
 
-# Class for buttons
+# class for leds
 class Led:
     def __init__(self, pos: tuple, size: tuple, panel):
         self.panel = panel
@@ -166,7 +169,7 @@ class Led:
                 break
 
 
-# Class for wires
+# class for wires
 class Wire:
     def __init__(self, inp, temp_points):
         self.inp = inp
@@ -198,10 +201,3 @@ class Wire:
     def update(self):
         self.inp.update()
         self.value = self.inp.value
-
-    def disconnect(self):
-        # Remove wire from output gate's input
-        for inputs in self.out.inp:
-            if inputs[0] is self:
-                inputs.pop()
-                break
