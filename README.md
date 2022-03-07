@@ -22,7 +22,7 @@
 ---
 
 ## 🟢 Example
-<a href="https://github.com/TINYT1ME/LogicCircuit/"><img src="https://i.postimg.cc/vBkwM0kj/example.gif"  title="Example"></a>
+<a href="https://github.com/TINYT1ME/LogicCircuit/"><img src="https://s7.gifyu.com/images/example.gif"  title="Example"></a>
 
 ---
 
