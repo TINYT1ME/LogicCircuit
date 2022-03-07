@@ -431,6 +431,8 @@ def wire_handler(pos, event):
 
 # Handling window drawing
 def draw_window(fps: int):
+    global temp_points
+    global first_gate
     x, y = pygame.mouse.get_pos()
 
     # draw bg and panels
@@ -466,8 +468,29 @@ def draw_window(fps: int):
     fps_counter = fps_font.render(str(fps), False, (0, 204, 34))
     WIN.blit(fps_counter, (9, 9))
 
+    # draw wire creation
+    if first_gate and temp_points:
+        for i in range(len(temp_points) - 1):
+            pygame.draw.line(
+                WIN,
+                (255, 255, 255),
+                (int(temp_points[i][0]), int(temp_points[i][1])),
+                (int(temp_points[i + 1][0]), int(temp_points[i + 1][1])),
+                5,
+            )
+        pygame.draw.line(
+            WIN,
+            (255, 255, 255),
+            (
+                int(temp_points[len(temp_points) - 1][0]),
+                int(temp_points[len(temp_points) - 1][1]),
+            ),
+            (x, y),
+            5,
+        )
+
     # draw circle when an item is selected
-    if selected is not None or first_gate is not None:
+    if selected:
         WIN.blit(circle, (x - 10, y - 10))
 
     # update screen
