@@ -262,8 +262,8 @@ def switch_handler(pos, event):
 
             # Remove switch
             switches.pop()
-    # MIDDLE CLICK
-    elif event.button == 2:
+    # RIGHT CLICK
+    elif event.button == 3:
         # Flipping switch value
         for switch in switches:
             if switch.click(pos):
