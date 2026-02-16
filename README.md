@@ -1,4 +1,4 @@
-
+# Grade 12 Computer Science Class Final Project
 <h1 align="center"  style="font-family: Courier, serif;">
   <a href="https://github.com/TINYT1ME/LogicCircuit/"><img src="https://i.postimg.cc/Gp3Cj8vM/logo.png" width="40" title="LogicCircuit"></a>
   Logic Circuit
